@@ -1,0 +1,96 @@
+---
+title: "Fit Copula"
+output: html_notebook
+---
+
+```{r}
+library(copula)
+library(data.table)
+
+dates <- read.csv("/Users/lasse/Desktop/EBSUni/Msc_Semester_1/Asset Management/EquityProject/Code/data_uniform/dates.csv", header = TRUE)
+
+results_0_0.5 <- list()
+results_0.5_1 <- list()
+
+for (i in 1:nrow(dates)) {
+    print(paste("Processing date:", dates[i, 1]))
+    assets_file_path <- paste("/Users/lasse/Desktop/EBSUni/Msc_Semester_1/Asset Management/EquityProject/Code/data_uniform/sp100_", dates[i, 1], ".csv", sep="")
+    benchmark_file_path <- paste("/Users/lasse/Desktop/EBSUni/Msc_Semester_1/Asset Management/EquityProject/Code/data_uniform/benchmark_", dates[i, 1], ".csv", sep="")
+  
+    if (file.exists(assets_file_path) && file.exists(benchmark_file_path)) {
+        assets_data <- read.csv(assets_file_path, header = TRUE)
+        benchmark_data <- read.csv(benchmark_file_path, header = TRUE)
+        benchmark_returns <- benchmark_data[,2]
+
+        for (j in 2:ncol(assets_data)) {
+            asset_returns <- assets_data[, j]
+            data_matrix <- cbind(asset_returns, benchmark_returns)
+            
+            # Filter data for 0 to 0.5 range
+            filtered_data_0_0.5 <- data_matrix[data_matrix[, 1] <= 0.5 & data_matrix[, 2] <= 0.5, ]
+            # Filter data for 0.5 to 1 range
+            filtered_data_0.5_1 <- data_matrix[data_matrix[, 1] > 0.5 & data_matrix[, 2] > 0.5, ]
+
+            density_0_0.5 <- 0
+            density_0.5_1 <- 0
+            
+            if (nrow(filtered_data_0_0.5) > 10 && !any(is.na(filtered_data_0_0.5))) {
+                gCop <- normalCopula(dim = 2, dispstr = "un")
+                fit <- fitCopula(gCop, filtered_data_0_0.5, method = "ml", optim.method = "BFGS", optim.control = list(maxit = 10000))
+
+                if (!is.null(fit)) {
+                    result <- tryCatch({
+                        density <- dCopula(filtered_data_0_0.5, fit@copula)
+                        density_0_0.5 <- mean(density)
+                    }, error = function(e) {
+                        print(paste("Error calculating density for range 0 to 0.5 for stock", names(assets_data)[j], "on", dates[i, 1], ":", e$message))
+                    })
+                }
+            }
+
+            if (nrow(filtered_data_0.5_1) > 10 && !any(is.na(filtered_data_0.5_1))) {
+                gCop <- normalCopula(dim = 2, dispstr = "un")
+                fit <- fitCopula(gCop, filtered_data_0.5_1, method = "ml", optim.method = "BFGS", optim.control = list(maxit = 10000))
+
+                if (!is.null(fit)) {
+                    result <- tryCatch({
+                        density <- dCopula(filtered_data_0.5_1, fit@copula)
+                        density_0.5_1 <- mean(density)
+                    }, error = function(e) {
+                        print(paste("Error calculating density for range 0.5 to 1 for stock", names(assets_data)[j], "on", dates[i, 1], ":", e$message))
+                    })
+                }
+            }
+            
+            results_0_0.5[[length(results_0_0.5) + 1]] <- data.table(
+                Date = dates[i, 1],
+                Stock = names(assets_data)[j],
+                Density = density_0_0.5
+            )
+            
+            results_0.5_1[[length(results_0.5_1) + 1]] <- data.table(
+                Date = dates[i, 1],
+                Stock = names(assets_data)[j],
+                Density = density_0.5_1
+            )
+        }
+    } else {
+        if (!file.exists(assets_file_path)) print(paste("Assets file does not exist:", assets_file_path))
+        if (!file.exists(benchmark_file_path)) print(paste("Benchmark file does not exist:", benchmark_file_path))
+    }
+}
+
+# Save all the stuff
+results_0_0.5_dt <- rbindlist(results_0_0.5)
+results_0.5_1_dt <- rbindlist(results_0.5_1)
+
+results_0_0.5_dt_wide <- dcast(results_0_0.5_dt, Date ~ Stock, value.var = "Density")
+results_0.5_1_dt_wide <- dcast(results_0.5_1_dt, Date ~ Stock, value.var = "Density")
+
+write.csv(results_0_0.5_dt_wide, "/Users/lasse/Desktop/EBSUni/Msc_Semester_1/Asset Management/EquityProject/Code/data_copulas/results_density_0_0.5.csv", row.names = FALSE)
+write.csv(results_0.5_1_dt_wide, "/Users/lasse/Desktop/EBSUni/Msc_Semester_1/Asset Management/EquityProject/Code/data_copulas/results_density_0.5_1.csv", row.names = FALSE)
+
+
+
+```
+
