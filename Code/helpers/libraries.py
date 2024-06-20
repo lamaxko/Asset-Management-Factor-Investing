@@ -6,6 +6,7 @@ import warnings
 
 import statsmodels.api as sm
 from scipy import stats
+import scipy.stats as stats
 from statsmodels.distributions.empirical_distribution import ECDF
 import pandas as pd
 from scipy.stats import genextreme, logistic, norm, t, uniform, kstest
