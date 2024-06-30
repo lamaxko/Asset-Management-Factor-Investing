@@ -8,6 +8,7 @@ This repository contains code and data for developing and analyzing our Copula f
 - **data_copulas/**: Contains data related to copulas.
 - **data_uniform/**: Contains transformed uniform data.
 - **helpers/**: Contains helper scripts, functions and libraries.
+- **requirements.txt:** pip3 install requirements.txt to get all dependencies.
 
 ## Files Description
 
