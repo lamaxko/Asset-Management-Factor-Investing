@@ -1,4 +1,3 @@
-import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,6 +19,7 @@ from statsmodels.distributions.empirical_distribution import ECDF
 import seaborn as sns
 import matplotlib.dates as mdates
 import matplotlib.cm as cm
+from matplotlib.ticker import PercentFormatter
 
 from sklearn.neighbors import KernelDensity
 from scipy.integrate import dblquad

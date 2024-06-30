@@ -144,11 +144,38 @@ def plot_combined_predicted_excess_returns(time_index, no_lag_predicted_excess_r
     plt.show()
     return
 
+def plot_combined_predicted_excess_returns_annualized(time_index, no_lag_predicted_excess_returns, one_year_lag_predicted_excess_returns, five_year_lag_predicted_excess_returns, actual_excess_returns):
+    # Annualizing by multiplying by 12
+    no_lag_predicted_annualized = no_lag_predicted_excess_returns * 12
+    one_year_lag_predicted_annualized = one_year_lag_predicted_excess_returns * 12
+    five_year_lag_predicted_annualized = five_year_lag_predicted_excess_returns * 12
+    mean_actual_excess_annualized = np.mean(actual_excess_returns) * 12
+    
+    plt.figure(figsize=(15, 8))
+    
+    plt.plot(time_index, no_lag_predicted_annualized, label='No Lag Predicted Annualized Excess Returns', color='blue', linewidth=2)
+    plt.plot(time_index, one_year_lag_predicted_annualized, label='1 Year Lag Predicted Annualized Excess Returns', color='green', linewidth=2)
+    plt.plot(time_index, five_year_lag_predicted_annualized, label='5 Year Lag Predicted Annualized Excess Returns', color='orange', linewidth=2)
+    plt.axhline(mean_actual_excess_annualized, color='red', linestyle='--', label='Mean Actual Annualized Excess Returns', linewidth=2)
+    
+    # Setting up the y-axis with percentage format
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1, decimals=0))
+    plt.grid(True, which='major', linestyle='--', linewidth='0.5', color='gray')
+    plt.grid(True, which='minor', linestyle=':', linewidth='0.5', color='lightgray')
+    
+    plt.title('Predicted Annualized Excess Returns with Different Lags')
+    plt.xlabel('Time')
+    plt.ylabel('Annualized Excess Returns (%)')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
 def plot_coefficient_of_variation_bars(no_lag_coef_of_variation, one_year_lag_coef_of_variation, five_year_lag_coef_of_variation):
     lags = ['No Lag', '1 Year Lag', '5 Year Lag']
     coef_of_variation_values = [no_lag_coef_of_variation, one_year_lag_coef_of_variation, five_year_lag_coef_of_variation]
     
-    plt.figure(figsize=(10, 3))
+    plt.figure(figsize=(15, 3))
     plt.barh(lags, coef_of_variation_values, color=['blue', 'green', 'orange'], alpha=0.7)
     
     for i, v in enumerate(coef_of_variation_values):
@@ -191,6 +218,8 @@ def plot_spread_cumulative_returns(top_20_returns, bottom_20_returns, ew_returns
                      label='Negative Spread (Top 20 < Bottom 20)')
 
     plt.title('Cumulative Portfolio Returns Spread Comparison')
+    plt.grid(True, which='major', linestyle='--', linewidth='0.5', color='gray')
+    plt.grid(True, which='minor', linestyle=':', linewidth='0.5', color='lightgray')
     plt.xlabel('Time')
     plt.ylabel('Cumulative Returns')
     plt.legend()
@@ -208,13 +237,15 @@ def plot_cumulative_returns(long_short_portfolio_returns, short_long_portfolio_r
     plt.title('Cumulative Portfolio Returns Long-Short and Short-Long Uside Ratio vs Inverse Upside Ratio')
     plt.xlabel('Time')
     plt.ylabel('Cumulative Returns')
+    plt.grid(True, which='major', linestyle='--', linewidth='0.5', color='gray')
+    plt.grid(True, which='minor', linestyle=':', linewidth='0.5', color='lightgray')
     plt.legend()
     plt.tight_layout()
     plt.show()
     return
 
 def plot_portfolio_portf_rf_excess(top_20_portfolio_returns, bottom_20_portfolio_returns, long_short_portfolio_returns, short_long_portfolio_returns, risk_free_rate):
-    plt.figure(figsize=(12, 7))
+    plt.figure(figsize=(12, 10))
 
     plt.subplot(3, 1, 1)
     plt.plot(top_20_portfolio_returns.index.to_timestamp(), top_20_portfolio_returns['Monthly Returns'], label='Top 20 Portfolio Returns', color='blue')
@@ -290,13 +321,13 @@ def plot_ff_one_regression(ax, ew_portfolio_excess_ret, factor, title):
     return
 
 def plot_gamma_histograms(gammas):
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
-    fig.suptitle('Histograms of Gamma 1 and Gamma 2', fontsize=16)
+    fig, axes = plt.subplots(2, 1, figsize=(10, 10), sharey=True)
+    fig.suptitle('Histograms of Lambda 1 and Lambda 2', fontsize=16)
 
     axes[0].hist(gammas['Gamma 1'].dropna(), bins=40, color='skyblue', edgecolor='black')
     axes[0].axvline(gammas['Gamma 1'].mean(), color='red', linestyle='dashed', linewidth=2)
-    axes[0].set_title('Gamma 1')
-    axes[0].set_xlabel('Gamma 1 Values')
+    axes[0].set_title('Lambda 1')
+    axes[0].set_xlabel('Lambda 1 Values')
     axes[0].set_ylabel('Frequency')
 
     axes[0].text(gammas['Gamma 1'].mean(), plt.ylim()[1]*0.9, f'Mean: {gammas["Gamma 1"].mean():.4f}', color='red', horizontalalignment='center')
@@ -304,11 +335,52 @@ def plot_gamma_histograms(gammas):
 
     axes[1].hist(gammas['Gamma 2'].dropna(), bins=40, color='lightgreen', edgecolor='black')
     axes[1].axvline(gammas['Gamma 2'].mean(), color='red', linestyle='dashed', linewidth=2)
-    axes[1].set_title('Gamma 2')
-    axes[1].set_xlabel('Gamma 2 Values')
+    axes[1].set_title('Lambda 2')
+    axes[1].set_xlabel('Lambda 2 Values')
 
     axes[1].text(gammas['Gamma 2'].mean(), plt.ylim()[1]*0.9, f'Mean: {gammas["Gamma 2"].mean():.4f}', color='red', horizontalalignment='center')
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
+    return
+
+def plot_ff_one_predictive_regressions_no_labels(top20_excess_ret, bottom20_excess_ret, long_short_excess_ret, short_long_excess_ret, ff_one_factor):
+    plt.figure(figsize=(10, 11))
+
+    ax1 = plt.subplot(4, 1, 1)
+    plot_ff_one_regression_no_labels(ax1, top20_excess_ret, ff_one_factor)
+    
+    ax2 = plt.subplot(4, 1, 2)
+    plot_ff_one_regression_no_labels(ax2, bottom20_excess_ret, ff_one_factor)
+    
+    ax3 = plt.subplot(4, 1, 3)
+    plot_ff_one_regression_no_labels(ax3, long_short_excess_ret, ff_one_factor)
+    
+    ax4 = plt.subplot(4, 1, 4)
+    plot_ff_one_regression_no_labels(ax4, short_long_excess_ret, ff_one_factor)
+    
+    plt.tight_layout()
+    plt.show()
+    return
+
+def plot_ff_one_regression_no_labels(ax, ew_portfolio_excess_ret, factor):
+    X = sm.add_constant(factor)
+    Y = ew_portfolio_excess_ret
+
+    model = sm.OLS(Y, X)
+    results = model.fit()
+
+    x_val = factor.values.flatten()
+    y_val = Y.values.flatten()
+
+    x_fit = np.linspace(x_val.min(), x_val.max(), 100)
+    y_fit = results.params['const'] + results.params[X.columns[1]] * x_fit
+
+    ax.scatter(x_val, y_val, color='blue', alpha=0.6, label='Data Points')
+    
+    ax.plot(x_fit, y_fit, 'r', label=f'Regression Line: Y = {results.params["const"]:.4f} + {results.params[X.columns[1]]:.4f}X')
+    
+    ax.set_title('')
+    ax.set_xlabel('')
+    ax.set_ylabel('')
     return
