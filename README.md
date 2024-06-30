@@ -7,45 +7,42 @@ This repository contains code and data for developing and analyzing our Copula f
 - **data/**: Contains raw data files.
 - **data_copulas/**: Contains data related to copulas.
 - **data_uniform/**: Contains transformed uniform data.
-- **helpers/**: Contains helper scripts, functions and libraries.
-- **requirements.txt:** pip3 install requirements.txt to get all dependencies.
+- **helpers/**: Contains helper scripts, functions, and libraries.
+- **requirements.txt**: Install all dependencies with `pip install -r requirements.txt`.
 
 ## Files Description
 
 ### 00_TransformUniform.ipynb
-This notebook transforms the returns of all stocks into uniform margins using CDF functions. The previous five months of daily returns are used, calculated on a rolling basis. The following distributions are considered:
+Transforms the returns of all stocks into uniform margins using CDF functions. Considers the following distributions:
 - GeV
 - Logistic
 - Normal
 - Student's t
 
-The best fit is selected based on P-value.
-
 ### 01_FitCopula.Rmd
-This R script fits Gaussian and Student t copulas to the data. The copula fitting is performed in R due to the availability of the copula package. The best fit is chosen based on maximum likelihood. The uniform data is split into two segments (0 to 0.5 and 0.5 to 1) to capture the negative and positive correlations of the stock with the market, respectively. Joint PDFs and the density of the returns of the stocks and the market are then calculated.
+Fits Gaussian and Student t copulas to the data using R for its copula package. The best fit is chosen based on maximum likelihood. Splits the uniform data into two segments to capture different correlations with the market.
 
 ### 02_CalcUpsideRatio.ipynb
-This notebook calculates the Upside Ratio in Python and saves the results. The ratio is obtained by dividing the positive density by the negative density for each stock.
+Calculates the Upside Ratio in Python and saves the results. The ratio is obtained by dividing the positive density by the negative density for each stock.
 
 ### 03_VisualizationIdea.ipynb
-This notebook provides visualizations for the Upside Ratio and related concepts, helping to illustrate the underlying idea.
+Provides visualizations for the Upside Ratio and related concepts.
 
 ### 10_PredictiveRegression.ipynb
-This notebook performs a predictive regression to assess the effectiveness of the Upside Ratio as a market timing tool. Excess returns of an equally weighted portfolio are regressed on an equally weighted value of the Upside Ratio factor obtained from previous steps. We test using a lag of our factor of 1 month, 1 year and 5 years.
+Performs a predictive regression to assess the effectiveness of the Upside Ratio as a market timing tool. Tests using a lag of the factor of 1 month, 1 year, and 5 years.
 
 ### 20_FamaFrench.ipynb
-
-This notebook conducts a Fama-French regression test on the top and bottom 20 stocks sorted annually. IPOs are considered in January when the company appears, and delisted companies have a return of 0 for the delisting period and are excluded from subsequent sorts. Excess returns of these two portfolios in additon to long-short and short-long portfolios are regressed on 1 and 3 factor Fama-French models.
+Conducts a Fama-French regression test on the top and bottom 20 stocks sorted annually. Excess returns of various portfolios are regressed on 1 and 3 factor Fama-French models.
 
 ### 30_FamaMacbeth.ipynb
-This notebook performs a Fama-MacBeth test on the Upside Ratio factor. It compares the Upside Ratio to market beta. The first regression runs for each company over the 120-month testing period, generating betas. Then, 120 regressions are performed, regressing excess returns on the betas and the Upside Ratio.
+Performs a Fama-MacBeth test on the Upside Ratio factor, comparing it to market beta. 
 
 ## Data and Timeframe
 - **Stocks**: 100 stocks from the S&P 100 index, with data available for 93.
 - **Timeframe**: June 2006 to July 2016 (120 months).
 - **Returns Calculation**: From the Total returns index.
 
-Feel free to explore the notebooks and scripts for detailed implementation and results. Contributions and feedback are welcome!
+Explore the notebooks and scripts for detailed implementation and results. Contributions and feedback are welcome!
 
 ---
 
